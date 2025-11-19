@@ -81,11 +81,56 @@ dependencies {
 
 // Maven Push
 
-//apply plugin: 'maven'
+apply plugin: 'maven-publish'
 //apply plugin: 'signing'
 
-//version = "2.0.2"
-//group = "com.facebook.conceal"
+version = "3.0.0-16kb"
+group = "com.github.ahadj65.conceal"
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                // این Artifact، فایل AAR ساخته شده توسط Build Release را استفاده می‌کند
+                artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+
+                // اضافه کردن Source Jar به انتشار
+                artifact androidSourcesJar
+
+                // تعیین Group ID، Artifact ID و Version در POM
+                groupId group
+                artifactId project.getName()
+                version project.version
+
+                // بازگرداندن تنظیمات POM که در Conceal موجود بود
+                pom {
+                    name = 'Conceal'
+                    description = 'Conceal is an easy to use, performant crypto library for android.'
+                    url = 'http://facebook.github.io/conceal'
+
+                    licenses {
+                        license {
+                            name = 'BSD 2-Clause License'
+                            url = 'https://github.com/facebook/conceal/blob/master/LICENSE'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'YourId'
+                            name = 'Your Name'
+                            email = 'Your Email'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 //signing {
 //    required { gradle.taskGraph.hasTask("uploadArchives") }
