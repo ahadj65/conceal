@@ -3,3 +3,7 @@ jdk:
 
 android:
   platform: 23
+
+before_install:
+  - yes | sdkmanager --licenses
+  - $ANDROID_HOME/tools/bin/sdkmanager "ndk;21.4.7075529"

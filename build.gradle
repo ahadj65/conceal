@@ -18,7 +18,7 @@ android {
       mavenCentral()
     }
 
-    ndkVersion "21.4.7075529"
+//    ndkVersion "21.4.7075529"
 
     compileSdkVersion 23
 
@@ -42,25 +42,15 @@ android {
     }
 
     task ndkBuildRelease(type: Exec) {
-        def ndkDir
-        if (project.hasProperty('android') && project.android.hasProperty('ndkDirectory') && android.ndkDirectory != null) {
-            ndkDir = android.ndkDirectory.absolutePath
-        } else {
-            def androidHome = System.getenv('ANDROID_HOME') ?: '/usr/local/android/sdk'
-            ndkDir = "$androidHome/ndk/${android.ndkVersion}"
-        }
-
+        def NDK_VERSION = "21.4.7075529"
+        def androidHome = System.getenv('ANDROID_HOME') ?: '/usr/local/android/sdk'
+        def ndkDir = "$androidHome/ndk/$NDK_VERSION"
         def ndkBuildPath = "$ndkDir/ndk-build"
-
         if (!file(ndkBuildPath).exists()) {
-            throw new GradleException("NDK build script not found at path: $ndkBuildPath")
+            throw new GradleException("NDK build script not found at path: $ndkBuildPath. Please ensure NDK $NDK_VERSION is installed on CI.")
         }
-
         commandLine ndkBuildPath
-
-
         def moduleRoot = file('.').absolutePath
-
         args '-C', moduleRoot,
                 'NDK_APPLICATION_MK=' + moduleRoot + '/native/Application.mk',
                 'NDK_MODULE_PATH=' + moduleRoot + '/native:' + moduleRoot + '/first-party/fbjni/native:' + moduleRoot + '/third-party',
