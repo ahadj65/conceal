@@ -41,30 +41,16 @@ android {
       }
     }
 
-    // --- Task NDK Build ایمن سازی شده برای محیط محلی و CI ---
     task ndkBuildRelease(type: Exec) {
         def NDK_VERSION = "21.4.7075529"
-        def ndkDir = null
-
-        if (project.hasProperty('android') && android.ndkDirectory != null && file(android.ndkDirectory).exists()) {
-            ndkDir = android.ndkDirectory.absolutePath
-        }
-
-        if (ndkDir == null) {
-            def androidHome = System.getenv('ANDROID_HOME') ?: '/usr/local/android/sdk'
-            ndkDir = "$androidHome/ndk/$NDK_VERSION"
-        }
-
+        def androidHome = System.getenv('ANDROID_HOME') ?: '/usr/local/android/sdk'
+        def ndkDir = "$androidHome/ndk/$NDK_VERSION"
         def ndkBuildPath = "$ndkDir/ndk-build"
-
         if (!file(ndkBuildPath).exists()) {
-            println("⚠️ WARNING: NDK build script not found at path: $ndkBuildPath. This is expected during local sync if you haven't set up NDK manually, or if you are in a CI environment.")
+            throw new GradleException("NDK build script not found at path: $ndkBuildPath. Please ensure NDK $NDK_VERSION is installed on CI.")
         }
-
         commandLine ndkBuildPath
-
         def moduleRoot = file('.').absolutePath
-
         args '-C', moduleRoot,
                 'NDK_APPLICATION_MK=' + moduleRoot + '/native/Application.mk',
                 'NDK_MODULE_PATH=' + moduleRoot + '/native:' + moduleRoot + '/first-party/fbjni/native:' + moduleRoot + '/third-party',
@@ -96,7 +82,7 @@ dependencies {
 apply plugin: 'maven-publish'
 //apply plugin: 'signing'
 
-version = "3.0.4-16kb"
+version = "3.0.5-16kb"
 group = "com.github.ahadj65.conceal"
 
 task androidSourcesJar(type: Jar) {
