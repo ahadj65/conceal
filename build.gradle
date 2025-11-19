@@ -46,14 +46,17 @@ android {
         // 1. مسیر NDK را مستقیما از تنظیمات SDK می خواند
         def ndkPath = android.ndkDirectory.absolutePath
 
+        // ⬅️ ریشه ماژول فعلی (Conceal) را تعریف کنید
+        def moduleRoot = file('.').absolutePath
+
         // 2. تنظیم دستور ndk-build
         commandLine ndkPath + '/ndk-build'
 
-        // 3. تعریف آرگومان ها (Args) به جای استفاده از commandLine طولانی
-        args '-C', file('.').absolutePath,
-                'NDK_APPLICATION_MK=' + project.rootDir.absolutePath + '/native/Application.mk',
-                'NDK_MODULE_PATH=' + project.rootDir.absolutePath + '/native:' + project.rootDir.absolutePath + '/first-party/fbjni/native:' + project.rootDir.absolutePath + '/third-party',
-                'APP_BUILD_SCRIPT=' + project.rootDir.absolutePath + '/native/jni/Android.mk'
+        // 3. تعریف آرگومان ها (Args) - از moduleRoot به جای project.rootDir استفاده کنید
+        args '-C', moduleRoot,
+                'NDK_APPLICATION_MK=' + moduleRoot + '/native/Application.mk',
+                'NDK_MODULE_PATH=' + moduleRoot + '/native:' + moduleRoot + '/first-party/fbjni/native:' + moduleRoot + '/third-party',
+                'APP_BUILD_SCRIPT=' + moduleRoot + '/native/jni/Android.mk'
     }
 
     tasks.withType(JavaCompile) {
