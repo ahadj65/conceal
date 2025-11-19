@@ -41,18 +41,26 @@ android {
       }
     }
 
-    // خط 44: تعریف وظیفه ndkBuildRelease
     task ndkBuildRelease(type: Exec) {
-        // 1. مسیر NDK را مستقیما از تنظیمات SDK می خواند
-        def ndkPath = android.ndkDirectory.absolutePath
+        def ndkDir
+        if (project.hasProperty('android') && project.android.hasProperty('ndkDirectory') && android.ndkDirectory != null) {
+            ndkDir = android.ndkDirectory.absolutePath
+        } else {
+            def androidHome = System.getenv('ANDROID_HOME') ?: '/usr/local/android/sdk'
+            ndkDir = "$androidHome/ndk/${android.ndkVersion}"
+        }
 
-        // ⬅️ ریشه ماژول فعلی (Conceal) را تعریف کنید
+        def ndkBuildPath = "$ndkDir/ndk-build"
+
+        if (!file(ndkBuildPath).exists()) {
+            throw new GradleException("NDK build script not found at path: $ndkBuildPath")
+        }
+
+        commandLine ndkBuildPath
+
+
         def moduleRoot = file('.').absolutePath
 
-        // 2. تنظیم دستور ndk-build
-        commandLine ndkPath + '/ndk-build'
-
-        // 3. تعریف آرگومان ها (Args) - از moduleRoot به جای project.rootDir استفاده کنید
         args '-C', moduleRoot,
                 'NDK_APPLICATION_MK=' + moduleRoot + '/native/Application.mk',
                 'NDK_MODULE_PATH=' + moduleRoot + '/native:' + moduleRoot + '/first-party/fbjni/native:' + moduleRoot + '/third-party',
